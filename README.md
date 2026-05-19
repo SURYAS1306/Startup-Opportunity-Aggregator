@@ -1,9 +1,9 @@
-# Startup Opportunity Aggregator
+# Foundry — Startup Opportunity Aggregator
 
 [![CI](https://github.com/SURYAS1306/Startup-Opportunity-Aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/SURYAS1306/Startup-Opportunity-Aggregator/actions)
 
 > **Assignment 3** — Web Scraping + Data Pipeline  
-> Collects startup opportunities (grants, hackathons, fellowships, conferences) from multiple public sources, deduplicates, stores in SQLite, and displays them in a searchable dashboard with analytics.
+> **Foundry** collects startup opportunities (grants, hackathons, fellowships, conferences) from multiple public sources, deduplicates them, stores in SQLite, and surfaces them in an editorial-style searchable dashboard.
 
 **Repository:** [github.com/SURYAS1306/Startup-Opportunity-Aggregator](https://github.com/SURYAS1306/Startup-Opportunity-Aggregator)
 

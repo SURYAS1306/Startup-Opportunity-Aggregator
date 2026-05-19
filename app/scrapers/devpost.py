@@ -11,7 +11,7 @@ DEVPOST_API = "https://devpost.com/api/hackathons"
 class DevpostScraper(BaseScraper):
     source_name = "Devpost"
 
-    def scrape(self, max_pages: int = 8) -> list[Opportunity]:
+    def scrape(self, max_pages: int = 12) -> list[Opportunity]:
         opportunities: list[Opportunity] = []
         search_q = "startup"
         if self.keyword:

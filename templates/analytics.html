@@ -1,89 +1,91 @@
 {% extends "base.html" %}
-{% block title %}Analytics — Opportunity Pulse{% endblock %}
+{% block title %}Insights — Foundry{% endblock %}
+{% block body_class %}page-insights{% endblock %}
+
+{% block topbar %}
+<h1 class="topbar-title">Pipeline Insights</h1>
+{% endblock %}
 
 {% block content %}
-<section class="page-header">
-  <h2>Pipeline Analytics</h2>
-  <p>Insights from scrape logs and aggregated opportunity data</p>
+<section class="insights-hero">
+  <p class="eyebrow">Data pipeline</p>
+  <h2 class="insights-headline">What's in the <em>foundry</em></h2>
+  <p class="insights-sub">Scrape logs, source breakdown, and auto-tag distribution.</p>
 </section>
 
-<section class="stats-bar">
-  <div class="stat-card highlight">
-    <span class="stat-value">{{ stats.total }}</span>
-    <span class="stat-label">Total stored</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-value">{{ stats.upcoming_deadlines|default(0) }}</span>
-    <span class="stat-label">With upcoming deadline</span>
-  </div>
-</section>
+<div class="insights-grid">
+  <article class="insight-tile tile-big">
+    <span class="tile-label">Total opportunities</span>
+    <span class="tile-mega">{{ stats.total }}</span>
+    <span class="tile-sub">{{ stats.upcoming_deadlines|default(0) }} with upcoming deadlines</span>
+  </article>
 
-<div class="charts-grid">
-  <div class="chart-card">
-    <h3>By source</h3>
-    <div class="bar-chart">
+  <article class="insight-tile">
+    <span class="tile-label">Sources</span>
+    <ul class="donut-legend">
       {% for source, count in stats.by_source.items() %}
-      <div class="bar-row">
-        <span class="bar-label">{{ source }}</span>
-        <div class="bar-track"><div class="bar-fill" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
-        <span class="bar-value">{{ count }}</span>
-      </div>
+      <li>
+        <span class="legend-dot dot-{{ loop.index }}"></span>
+        <span>{{ source }}</span>
+        <strong>{{ count }}</strong>
+        <div class="legend-bar"><i style="width:{{ (count / stats.total * 100) if stats.total else 0 }}%"></i></div>
+      </li>
       {% endfor %}
-    </div>
-  </div>
-  <div class="chart-card">
-    <h3>By type</h3>
-    <div class="bar-chart">
+    </ul>
+  </article>
+
+  <article class="insight-tile">
+    <span class="tile-label">By type</span>
+    <ul class="donut-legend">
       {% for typ, count in stats.by_type.items() %}
-      <div class="bar-row">
-        <span class="bar-label">{{ typ }}</span>
-        <div class="bar-track"><div class="bar-fill bar-fill-alt" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
-        <span class="bar-value">{{ count }}</span>
-      </div>
+      <li>
+        <span class="legend-dot dot-alt-{{ loop.index }}"></span>
+        <span>{{ typ }}</span>
+        <strong>{{ count }}</strong>
+        <div class="legend-bar bar-alt"><i style="width:{{ (count / stats.total * 100) if stats.total else 0 }}%"></i></div>
+      </li>
       {% endfor %}
-    </div>
-  </div>
+    </ul>
+  </article>
+
   {% if stats.by_work_mode %}
-  <div class="chart-card">
-    <h3>Work mode (auto-tagged)</h3>
-    <div class="bar-chart">
+  <article class="insight-tile">
+    <span class="tile-label">Work mode tags</span>
+    <ul class="donut-legend">
       {% for mode, count in stats.by_work_mode.items() %}
-      <div class="bar-row">
-        <span class="bar-label">{{ mode }}</span>
-        <div class="bar-track"><div class="bar-fill bar-fill-green" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
-        <span class="bar-value">{{ count }}</span>
-      </div>
+      <li>
+        <span class="legend-dot dot-green"></span>
+        <span>{{ mode }}</span>
+        <strong>{{ count }}</strong>
+        <div class="legend-bar bar-green"><i style="width:{{ (count / stats.total * 100) if stats.total else 0 }}%"></i></div>
+      </li>
       {% endfor %}
-    </div>
-  </div>
+    </ul>
+  </article>
   {% endif %}
 </div>
 
-<section class="chart-card scrape-log-section">
-  <h3>Recent scrape runs</h3>
+<section class="log-board">
+  <header class="log-board-head">
+    <h3>Scrape history</h3>
+    <span class="log-badge">{{ stats.recent_scrapes|length }} recent runs</span>
+  </header>
   {% if stats.recent_scrapes %}
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Time (UTC)</th><th>Keyword</th><th>Scraped</th><th>Inserted</th><th>Duration</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for log in stats.recent_scrapes %}
-      <tr>
-        <td>{{ log.ran_at[:19] }}</td>
-        <td>{{ log.keyword }}</td>
-        <td>{{ log.scraped }}</td>
-        <td>{{ log.inserted }}</td>
-        <td>{{ log.duration_ms }}ms</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="log-rows">
+    {% for log in stats.recent_scrapes %}
+    <div class="log-row">
+      <span class="log-time">{{ log.ran_at[:16].replace('T', ' ') }}</span>
+      <span class="log-kw">"{{ log.keyword }}"</span>
+      <span class="log-stat"><b>{{ log.scraped }}</b> scraped</span>
+      <span class="log-stat"><b>{{ log.inserted }}</b> new</span>
+      <span class="log-dur">{{ log.duration_ms }}ms</span>
+    </div>
+    {% endfor %}
+  </div>
   {% else %}
-  <p class="muted">No scrape logs yet. Run the scraper from the dashboard.</p>
+  <p class="log-empty">No runs logged yet — sync from the Discover page.</p>
   {% endif %}
 </section>
 
-<a href="/" class="btn btn-primary">← Back to dashboard</a>
+<a href="/" class="back-link">← Back to Discover</a>
 {% endblock %}
