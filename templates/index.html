@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <h2>Discover grants, hackathons &amp; programs for your startup</h2>
+    <p>Aggregated from 3 public sources · deduplicated · searchable · auto-updated</p>
+  </div>
+  <div class="hero-badges">
+  {% for source, count in stats.by_source.items() %}
+    <span class="hero-badge">{{ source }} <strong>{{ count }}</strong></span>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="stats-bar">
+  <div class="stat-card highlight">
+    <span class="stat-value">{{ stats.total }}</span>
+    <span class="stat-label">Opportunities</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.upcoming_deadlines|default(0) }}</span>
+    <span class="stat-label">Upcoming deadlines</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.by_source|length }}</span>
+    <span class="stat-label">Live sources</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.last_updated[:10] if stats.last_updated else '—' }}</span>
+    <span class="stat-label">Last sync</span>
+  </div>
+</section>
+
+<div class="layout-with-sidebar">
+  <aside class="sidebar">
+    <form class="filters" method="get" action="/">
+      <h3>Filters</h3>
+      <label class="filter-label">Search
+        <input type="search" name="q" value="{{ query.q }}" placeholder="AI startup" class="input">
+      </label>
+      <label class="filter-label">Type
+        <select name="type" class="input">
+          <option value="">All types</option>
+          {% for t in filters.types %}
+          <option value="{{ t }}" {% if query.type == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Source
+        <select name="source" class="input">
+          <option value="">All sources</option>
+          {% for s in filters.sources %}
+          <option value="{{ s }}" {% if query.source == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Work mode
+        <select name="work_mode" class="input">
+          <option value="">Any</option>
+          {% for w in filters.work_modes %}
+          <option value="{{ w }}" {% if query.work_mode == w %}selected{% endif %}>{{ w }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Startup stage
+        <select name="stage" class="input">
+          <option value="">Any stage</option>
+          {% for s in filters.stages %}
+          <option value="{{ s }}" {% if query.stage == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Deadline from
+        <input type="date" name="deadline_from" value="{{ query.deadline_from }}" class="input">
+      </label>
+      <label class="filter-label">Deadline to
+        <input type="date" name="deadline_to" value="{{ query.deadline_to }}" class="input">
+      </label>
+      <label class="filter-label">Sort by
+        <select name="sort" class="input">
+          <option value="deadline" {% if query.sort == 'deadline' %}selected{% endif %}>Deadline</option>
+          <option value="newest" {% if query.sort == 'newest' %}selected{% endif %}>Newest</option>
+          <option value="title" {% if query.sort == 'title' %}selected{% endif %}>Title A–Z</option>
+          <option value="source" {% if query.sort == 'source' %}selected{% endif %}>Source</option>
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Apply</button>
+      <a href="/" class="btn btn-ghost btn-block">Reset</a>
+    </form>
+    <section class="alert-box">
+      <h3>Email alerts</h3>
+      <p class="muted">Get notified when new matches appear.</p>
+      <form id="alert-form">
+        <input type="email" name="email" class="input" placeholder="you@email.com" required>
+        <input type="hidden" name="keyword" value="{{ query.q or 'AI startup' }}">
+        <button type="submit" class="btn btn-secondary btn-block">Subscribe</button>
+      </form>
+    </section>
+  </aside>
+
+  <section class="main-panel">
+    <div class="panel-toolbar">
+      <p class="results-count"><strong>{{ opportunities|length }}</strong> results</p>
+      <div class="view-toggle">
+        <button type="button" class="btn btn-ghost view-btn active" data-view="grid">Grid</button>
+        <button type="button" class="btn btn-ghost view-btn" data-view="table">Table</button>
+      </div>
+    </div>
+
+    {% if opportunities %}
+    <div id="table-view" class="table-wrap hidden">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Title</th><th>Type</th><th>Source</th><th>Location</th><th>Deadline</th><th>Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for opp in opportunities %}
+          <tr>
+            <td><a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a></td>
+            <td><span class="badge">{{ opp.type }}</span></td>
+            <td>{{ opp.source }}</td>
+            <td>{{ opp.location or '—' }}</td>
+            <td class="deadline">{{ opp.deadline_iso or opp.deadline or '—' }}</td>
+            <td>
+              {% if opp.work_mode %}<span class="tag">{{ opp.work_mode }}</span>{% endif %}
+              {% if opp.funding_range %}<span class="tag">{{ opp.funding_range }}</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div id="grid-view" class="cards-grid">
+      {% for opp in opportunities %}
+      <article class="opp-card">
+        <header class="opp-card-header">
+          <span class="badge badge-{{ opp.type|lower|replace(' ', '-') }}">{{ opp.type }}</span>
+          <span class="source-tag">{{ opp.source }}</span>
+        </header>
+        <h2><a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a></h2>
+        <dl class="opp-meta">
+          <div><dt>Organizer</dt><dd>{{ opp.organizer or '—' }}</dd></div>
+          <div><dt>Location</dt><dd>{{ opp.location or '—' }}</dd></div>
+          <div><dt>Deadline</dt><dd class="deadline">{{ opp.deadline_iso or opp.deadline or 'See source' }}</dd></div>
+        </dl>
+        {% if opp.description %}
+        <p class="opp-desc">{{ opp.description[:200] }}{% if opp.description|length > 200 %}…{% endif %}</p>
+        {% endif %}
+        <div class="tags-row">
+          {% if opp.funding_range %}<span class="tag tag-funding">{{ opp.funding_range }}</span>{% endif %}
+          {% if opp.startup_stage %}<span class="tag">{{ opp.startup_stage }}</span>{% endif %}
+          {% if opp.work_mode %}<span class="tag tag-remote">{{ opp.work_mode }}</span>{% endif %}
+        </div>
+        <a href="{{ opp.source_url }}" class="card-link" target="_blank" rel="noopener">View opportunity →</a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h2>No opportunities yet</h2>
+      <p>Click <strong>Run Scraper</strong> or run <code>./start.sh</code> to populate the database.</p>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

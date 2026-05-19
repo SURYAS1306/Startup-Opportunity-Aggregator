@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run scraper (smoke)
+        run: python scripts/run_scraper.py --keyword "startup"
+      - name: Test Flask app
+        run: |
+          python -c "
+          from app import create_app
+          app = create_app(run_scheduler=False)
+          c = app.test_client()
+          assert c.get('/').status_code == 200
+          assert c.get('/health').status_code == 200
+          assert c.get('/analytics').status_code == 200
+          print('All routes OK')
+          "

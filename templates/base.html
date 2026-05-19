@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aggregate startup grants, hackathons, fellowships and accelerators from SBIR, Devpost, and Opportunity Desk.">
+  <title>{% block title %}Opportunity Pulse — Startup Opportunity Aggregator{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="brand">
+      <span class="brand-icon">◆</span>
+      <div>
+        <h1>Opportunity Pulse</h1>
+        <p>Startup Opportunity Aggregator</p>
+      </div>
+    </a>
+    <nav class="main-nav">
+      <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Dashboard</a>
+      <a href="/analytics" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">Analytics</a>
+      <a href="/health" class="nav-link" target="_blank">API Health</a>
+    </nav>
+    <nav class="header-actions">
+      <a href="{{ url_for('main.export_data', fmt='csv') }}" class="btn btn-ghost">CSV</a>
+      <a href="{{ url_for('main.export_data', fmt='json') }}" class="btn btn-ghost">JSON</a>
+      <button id="scrape-btn" class="btn btn-primary" type="button">⟳ Run Scraper</button>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>
+      <strong>Sources:</strong>
+      <a href="https://www.sbir.gov/topics" target="_blank" rel="noopener">SBIR.gov</a> ·
+      <a href="https://devpost.com/hackathons" target="_blank" rel="noopener">Devpost</a> ·
+      <a href="https://opportunitydesk.org" target="_blank" rel="noopener">Opportunity Desk</a>
+    </p>
+    <p class="footer-meta">Auto-refresh every 6h · Built for Assignment 3 — Web Scraping + Data Pipeline</p>
+  </footer>
+
+  <div id="scrape-modal" class="modal hidden" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <h2 id="modal-title">Run Scraper</h2>
+      <label>Keyword <input type="text" id="scrape-keyword" class="input" value="AI startup"></label>
+      <label>Region <input type="text" id="scrape-region" class="input" placeholder="e.g. United States, Global"></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+        <button type="button" id="scrape-confirm" class="btn btn-primary">Start scraping</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

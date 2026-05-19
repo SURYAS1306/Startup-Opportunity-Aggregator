@@ -1,0 +1,2 @@
+# Run scraper every 6 hours
+0 */6 * * * cd /path/to/startup-opportunity-aggregator && .venv/bin/python scripts/run_scraper.py --keyword "AI startup" >> logs/scrape.log 2>&1

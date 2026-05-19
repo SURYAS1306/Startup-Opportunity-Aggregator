@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Opportunity Pulse{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <h2>Pipeline Analytics</h2>
+  <p>Insights from scrape logs and aggregated opportunity data</p>
+</section>
+
+<section class="stats-bar">
+  <div class="stat-card highlight">
+    <span class="stat-value">{{ stats.total }}</span>
+    <span class="stat-label">Total stored</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.upcoming_deadlines|default(0) }}</span>
+    <span class="stat-label">With upcoming deadline</span>
+  </div>
+</section>
+
+<div class="charts-grid">
+  <div class="chart-card">
+    <h3>By source</h3>
+    <div class="bar-chart">
+      {% for source, count in stats.by_source.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ source }}</span>
+        <div class="bar-track"><div class="bar-fill" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
+        <span class="bar-value">{{ count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="chart-card">
+    <h3>By type</h3>
+    <div class="bar-chart">
+      {% for typ, count in stats.by_type.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ typ }}</span>
+        <div class="bar-track"><div class="bar-fill bar-fill-alt" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
+        <span class="bar-value">{{ count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% if stats.by_work_mode %}
+  <div class="chart-card">
+    <h3>Work mode (auto-tagged)</h3>
+    <div class="bar-chart">
+      {% for mode, count in stats.by_work_mode.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ mode }}</span>
+        <div class="bar-track"><div class="bar-fill bar-fill-green" style="width: {{ (count / stats.total * 100) if stats.total else 0 }}%"></div></div>
+        <span class="bar-value">{{ count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<section class="chart-card scrape-log-section">
+  <h3>Recent scrape runs</h3>
+  {% if stats.recent_scrapes %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Time (UTC)</th><th>Keyword</th><th>Scraped</th><th>Inserted</th><th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in stats.recent_scrapes %}
+      <tr>
+        <td>{{ log.ran_at[:19] }}</td>
+        <td>{{ log.keyword }}</td>
+        <td>{{ log.scraped }}</td>
+        <td>{{ log.inserted }}</td>
+        <td>{{ log.duration_ms }}ms</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No scrape logs yet. Run the scraper from the dashboard.</p>
+  {% endif %}
+</section>
+
+<a href="/" class="btn btn-primary">← Back to dashboard</a>
+{% endblock %}
