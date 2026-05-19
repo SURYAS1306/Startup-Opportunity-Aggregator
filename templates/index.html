@@ -1,185 +1,169 @@
 {% extends "base.html" %}
-{% block body_class %}page-discover{% endblock %}
-
-{% block topbar %}
-<form class="topbar-search" method="get" action="/">
-  <input type="search" name="q" value="{{ query.q }}" placeholder="Search opportunities…" class="search-input">
-  <button type="submit" class="search-submit">Search</button>
-</form>
-{% endblock %}
 
 {% block content %}
-<section class="masthead">
-  <div class="masthead-copy">
-    <p class="eyebrow">Startup Opportunity Aggregator</p>
-    <h1 class="masthead-title">
-      <span class="title-line">{{ stats.total }}</span>
-      <span class="title-rest">open doors<br>for your startup</span>
-    </h1>
+<section class="hero">
+  <div class="hero-text">
+    <h2>Discover grants, hackathons &amp; programs for your startup</h2>
+    <p>Aggregated from 3 public sources · deduplicated · searchable · auto-updated</p>
   </div>
-  <div class="masthead-stats">
-    <div class="bento bento-coral">
-      <span class="bento-num">{{ stats.upcoming_deadlines|default(0) }}</span>
-      <span class="bento-label">Closing soon</span>
-    </div>
-    <div class="bento bento-lime">
-      <span class="bento-num">{{ stats.by_source|length }}</span>
-      <span class="bento-label">Sources</span>
-    </div>
-    <div class="bento bento-ink">
-      <span class="bento-num">{{ stats.last_updated[5:10] if stats.last_updated else '—' }}</span>
-      <span class="bento-label">Last sync</span>
-    </div>
-  </div>
-</section>
-
-<section class="source-pills">
+  <div class="hero-badges">
   {% for source, count in stats.by_source.items() %}
-  <span class="source-pill">{{ source }}<strong>{{ count }}</strong></span>
+    <span class="hero-badge">{{ source }} <strong>{{ count }}</strong></span>
   {% endfor %}
-</section>
-
-<section class="filter-deck">
-  <form method="get" action="/" class="filter-form" id="filter-form">
-    <input type="hidden" name="q" value="{{ query.q }}">
-    <div class="filter-scroll">
-      <select name="type" class="filter-chip-select" onchange="this.form.submit()">
-        <option value="">All types</option>
-        {% for t in filters.types %}
-        <option value="{{ t }}" {% if query.type == t %}selected{% endif %}>{{ t }}</option>
-        {% endfor %}
-      </select>
-      <select name="source" class="filter-chip-select" onchange="this.form.submit()">
-        <option value="">All sources</option>
-        {% for s in filters.sources %}
-        <option value="{{ s }}" {% if query.source == s %}selected{% endif %}>{{ s }}</option>
-        {% endfor %}
-      </select>
-      <select name="work_mode" class="filter-chip-select" onchange="this.form.submit()">
-        <option value="">Work mode</option>
-        {% for w in filters.work_modes %}
-        <option value="{{ w }}" {% if query.work_mode == w %}selected{% endif %}>{{ w }}</option>
-        {% endfor %}
-      </select>
-      <select name="stage" class="filter-chip-select" onchange="this.form.submit()">
-        <option value="">Stage</option>
-        {% for s in filters.stages %}
-        <option value="{{ s }}" {% if query.stage == s %}selected{% endif %}>{{ s }}</option>
-        {% endfor %}
-      </select>
-      <select name="sort" class="filter-chip-select" onchange="this.form.submit()">
-        <option value="deadline" {% if query.sort == 'deadline' %}selected{% endif %}>Sort: Deadline</option>
-        <option value="newest" {% if query.sort == 'newest' %}selected{% endif %}>Newest</option>
-        <option value="title" {% if query.sort == 'title' %}selected{% endif %}>A–Z</option>
-      </select>
-      <input type="date" name="deadline_from" value="{{ query.deadline_from }}" class="filter-date" title="From" onchange="this.form.submit()">
-      <input type="date" name="deadline_to" value="{{ query.deadline_to }}" class="filter-date" title="To" onchange="this.form.submit()">
-    </div>
-    {% if query.type or query.source or query.work_mode or query.stage or query.deadline_from %}
-    <a href="/?q={{ query.q|urlencode }}" class="filter-clear">Clear filters ×</a>
-    {% endif %}
-  </form>
-
-  <div class="view-switch" role="tablist">
-    <button type="button" class="view-tab is-on" data-view="feed">Feed</button>
-    <button type="button" class="view-tab" data-view="compact">Compact</button>
   </div>
 </section>
 
-<div class="discover-layout">
-  <section class="feed-panel">
-    <header class="feed-header">
-      <h2>{{ opportunities|length }} <span>results</span></h2>
-    </header>
+<section class="stats-bar">
+  <div class="stat-card highlight">
+    <span class="stat-value">{{ stats.total }}</span>
+    <span class="stat-label">Opportunities</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.upcoming_deadlines|default(0) }}</span>
+    <span class="stat-label">Upcoming deadlines</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.by_source|length }}</span>
+    <span class="stat-label">Live sources</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.last_updated[:10] if stats.last_updated else '—' }}</span>
+    <span class="stat-label">Last sync</span>
+  </div>
+</section>
+
+<div class="layout-with-sidebar">
+  <aside class="sidebar">
+    <form class="filters" method="get" action="/">
+      <h3>Filters</h3>
+      <label class="filter-label">Search
+        <input type="search" name="q" value="{{ query.q }}" placeholder="AI startup" class="input">
+      </label>
+      <label class="filter-label">Type
+        <select name="type" class="input">
+          <option value="">All types</option>
+          {% for t in filters.types %}
+          <option value="{{ t }}" {% if query.type == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Source
+        <select name="source" class="input">
+          <option value="">All sources</option>
+          {% for s in filters.sources %}
+          <option value="{{ s }}" {% if query.source == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Work mode
+        <select name="work_mode" class="input">
+          <option value="">Any</option>
+          {% for w in filters.work_modes %}
+          <option value="{{ w }}" {% if query.work_mode == w %}selected{% endif %}>{{ w }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Startup stage
+        <select name="stage" class="input">
+          <option value="">Any stage</option>
+          {% for s in filters.stages %}
+          <option value="{{ s }}" {% if query.stage == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">Deadline from
+        <input type="date" name="deadline_from" value="{{ query.deadline_from }}" class="input">
+      </label>
+      <label class="filter-label">Deadline to
+        <input type="date" name="deadline_to" value="{{ query.deadline_to }}" class="input">
+      </label>
+      <label class="filter-label">Sort by
+        <select name="sort" class="input">
+          <option value="deadline" {% if query.sort == 'deadline' %}selected{% endif %}>Deadline</option>
+          <option value="newest" {% if query.sort == 'newest' %}selected{% endif %}>Newest</option>
+          <option value="title" {% if query.sort == 'title' %}selected{% endif %}>Title A–Z</option>
+          <option value="source" {% if query.sort == 'source' %}selected{% endif %}>Source</option>
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Apply</button>
+      <a href="/" class="btn btn-ghost btn-block">Reset</a>
+    </form>
+    <section class="alert-box">
+      <h3>Email alerts</h3>
+      <p class="muted">Get notified when new matches appear.</p>
+      <form id="alert-form">
+        <input type="email" name="email" class="input" placeholder="you@email.com" required>
+        <input type="hidden" name="keyword" value="{{ query.q or 'AI startup' }}">
+        <button type="submit" class="btn btn-secondary btn-block">Subscribe</button>
+      </form>
+    </section>
+  </aside>
+
+  <section class="main-panel">
+    <div class="panel-toolbar">
+      <p class="results-count"><strong>{{ opportunities|length }}</strong> results</p>
+      <div class="view-toggle">
+        <button type="button" class="btn btn-ghost view-btn active" data-view="grid">Grid</button>
+        <button type="button" class="btn btn-ghost view-btn" data-view="table">Table</button>
+      </div>
+    </div>
 
     {% if opportunities %}
-    <ol id="feed-view" class="opp-feed">
-      {% for opp in opportunities %}
-      <li class="opp-row type-{{ opp.type|lower|replace(' ', '-') }}">
-        <span class="opp-index">{{ '%02d'|format(loop.index) }}</span>
-        <div class="opp-body">
-          <div class="opp-top">
-            <span class="type-stamp">{{ opp.type }}</span>
-            <span class="opp-source">{{ opp.source }}</span>
-          </div>
-          <h3 class="opp-title">
-            <a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a>
-          </h3>
-          <p class="opp-organizer">{{ opp.organizer or 'Various organizers' }}</p>
-          {% if opp.description %}
-          <p class="opp-snippet">{{ opp.description[:160] }}{% if opp.description|length > 160 %}…{% endif %}</p>
-          {% endif %}
-          <div class="opp-tags">
-            {% if opp.funding_range %}<span class="pill pill-money">{{ opp.funding_range }}</span>{% endif %}
-            {% if opp.startup_stage %}<span class="pill">{{ opp.startup_stage }}</span>{% endif %}
-            {% if opp.work_mode %}<span class="pill pill-mode">{{ opp.work_mode }}</span>{% endif %}
-            <span class="pill pill-loc">{{ opp.location or 'Global' }}</span>
-          </div>
-        </div>
-        <aside class="opp-aside">
-          <time class="opp-deadline">{{ opp.deadline_iso or opp.deadline or 'TBD' }}</time>
-          <a href="{{ opp.source_url }}" class="opp-go" target="_blank" rel="noopener" aria-label="Open">→</a>
-        </aside>
-      </li>
-      {% endfor %}
-    </ol>
-
-    <div id="compact-view" class="opp-compact hidden">
-      <table class="compact-table">
+    <div id="table-view" class="table-wrap hidden">
+      <table class="data-table">
         <thead>
-          <tr><th></th><th>Title</th><th>Type</th><th>Deadline</th><th></th></tr>
+          <tr>
+            <th>Title</th><th>Type</th><th>Source</th><th>Location</th><th>Deadline</th><th>Tags</th>
+          </tr>
         </thead>
         <tbody>
           {% for opp in opportunities %}
           <tr>
-            <td class="c-num">{{ loop.index }}</td>
-            <td class="c-title"><a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a><small>{{ opp.source }}</small></td>
-            <td><span class="type-stamp sm">{{ opp.type }}</span></td>
-            <td class="c-deadline">{{ opp.deadline_iso or opp.deadline or '—' }}</td>
-            <td><a href="{{ opp.source_url }}" class="opp-go sm" target="_blank">→</a></td>
+            <td><a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a></td>
+            <td><span class="badge">{{ opp.type }}</span></td>
+            <td>{{ opp.source }}</td>
+            <td>{{ opp.location or '—' }}</td>
+            <td class="deadline">{{ opp.deadline_iso or opp.deadline or '—' }}</td>
+            <td>
+              {% if opp.work_mode %}<span class="tag">{{ opp.work_mode }}</span>{% endif %}
+              {% if opp.funding_range %}<span class="tag">{{ opp.funding_range }}</span>{% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    <div id="grid-view" class="cards-grid">
+      {% for opp in opportunities %}
+      <article class="opp-card">
+        <header class="opp-card-header">
+          <span class="badge badge-{{ opp.type|lower|replace(' ', '-') }}">{{ opp.type }}</span>
+          <span class="source-tag">{{ opp.source }}</span>
+        </header>
+        <h2><a href="{{ opp.source_url }}" target="_blank" rel="noopener">{{ opp.title }}</a></h2>
+        <dl class="opp-meta">
+          <div><dt>Organizer</dt><dd>{{ opp.organizer or '—' }}</dd></div>
+          <div><dt>Location</dt><dd>{{ opp.location or '—' }}</dd></div>
+          <div><dt>Deadline</dt><dd class="deadline">{{ opp.deadline_iso or opp.deadline or 'See source' }}</dd></div>
+        </dl>
+        {% if opp.description %}
+        <p class="opp-desc">{{ opp.description[:200] }}{% if opp.description|length > 200 %}…{% endif %}</p>
+        {% endif %}
+        <div class="tags-row">
+          {% if opp.funding_range %}<span class="tag tag-funding">{{ opp.funding_range }}</span>{% endif %}
+          {% if opp.startup_stage %}<span class="tag">{{ opp.startup_stage }}</span>{% endif %}
+          {% if opp.work_mode %}<span class="tag tag-remote">{{ opp.work_mode }}</span>{% endif %}
+        </div>
+        <a href="{{ opp.source_url }}" class="card-link" target="_blank" rel="noopener">View opportunity →</a>
+      </article>
+      {% endfor %}
+    </div>
     {% else %}
-    <div class="empty-foundry">
-      <div class="empty-icon">◎</div>
-      <h2>Nothing here yet</h2>
-      <p>Hit <strong>Sync sources</strong> in the sidebar to load grants, hackathons &amp; fellowships.</p>
-      <button type="button" class="btn-solid" onclick="document.getElementById('scrape-btn').click()">Sync now</button>
+    <div class="empty-state">
+      <h2>No opportunities yet</h2>
+      <p>Click <strong>Run Scraper</strong> or run <code>./start.sh</code> to populate the database.</p>
     </div>
     {% endif %}
   </section>
-
-  <aside class="rail-panel">
-    <div class="rail-card rail-alert">
-      <h3>Watchlist</h3>
-      <p>Email me when new <strong>{{ query.q or 'AI startup' }}</strong> matches land.</p>
-      <form id="alert-form" class="alert-form">
-        <input type="email" name="email" placeholder="you@startup.com" required>
-        <input type="hidden" name="keyword" value="{{ query.q or 'AI startup' }}">
-        <button type="submit" class="btn-solid btn-full">Subscribe</button>
-      </form>
-    </div>
-
-    <div class="rail-card">
-      <h3>By type</h3>
-      <ul class="rail-list">
-        {% for typ, count in stats.by_type.items() %}
-        <li>
-          <span>{{ typ }}</span>
-          <span class="rail-bar"><i style="width:{{ (count / stats.total * 100) if stats.total else 0 }}%"></i></span>
-          <strong>{{ count }}</strong>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <a href="/analytics" class="rail-cta">
-      <span>View full analytics</span>
-      <span class="cta-arrow">↗</span>
-    </a>
-  </aside>
 </div>
 {% endblock %}

@@ -3,93 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Startup grants, hackathons, fellowships — aggregated & searchable.">
-  <title>{% block title %}Foundry — Startup Opportunities{% endblock %}</title>
+  <meta name="description" content="Aggregate startup grants, hackathons, fellowships and accelerators from SBIR, Devpost, and Opportunity Desk.">
+  <title>{% block title %}Opportunity Pulse — Startup Opportunity Aggregator{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="{% block body_class %}{% endblock %}">
-  <div class="grain" aria-hidden="true"></div>
-
-  <aside class="shell-sidebar" id="sidebar">
-    <a href="/" class="logo-lockup">
-      <span class="logo-mark">F</span>
-      <span class="logo-word">Foundry</span>
+<body>
+  <header class="site-header">
+    <a href="/" class="brand">
+      <span class="brand-icon">◆</span>
+      <div>
+        <h1>Opportunity Pulse</h1>
+        <p>Startup Opportunity Aggregator</p>
+      </div>
     </a>
-    <p class="sidebar-tagline">Opportunity intelligence for builders</p>
-
-    <nav class="shell-nav">
-      <a href="/" class="shell-nav-item {% if request.path == '/' %}is-active{% endif %}">
-        <span class="nav-num">01</span> Discover
-      </a>
-      <a href="/analytics" class="shell-nav-item {% if request.path == '/analytics' %}is-active{% endif %}">
-        <span class="nav-num">02</span> Insights
-      </a>
-      <a href="/health" class="shell-nav-item" target="_blank">
-        <span class="nav-num">03</span> System
-      </a>
+    <nav class="main-nav">
+      <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Dashboard</a>
+      <a href="/analytics" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">Analytics</a>
+      <a href="/health" class="nav-link" target="_blank">API Health</a>
     </nav>
+    <nav class="header-actions">
+      <a href="{{ url_for('main.export_data', fmt='csv') }}" class="btn btn-ghost">CSV</a>
+      <a href="{{ url_for('main.export_data', fmt='json') }}" class="btn btn-ghost">JSON</a>
+      <button id="scrape-btn" class="btn btn-primary" type="button">⟳ Run Scraper</button>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>
+      <strong>Sources:</strong>
+      <a href="https://www.sbir.gov/topics" target="_blank" rel="noopener">SBIR.gov</a> ·
+      <a href="https://devpost.com/hackathons" target="_blank" rel="noopener">Devpost</a> ·
+      <a href="https://opportunitydesk.org" target="_blank" rel="noopener">Opportunity Desk</a>
+    </p>
+    <p class="footer-meta">Auto-refresh every 6h · Built for Assignment 3 — Web Scraping + Data Pipeline</p>
+  </footer>
 
-    <div class="sidebar-actions">
-      <button id="scrape-btn" type="button" class="btn-scrape">
-        <span class="btn-scrape-icon">↻</span> Sync sources
-      </button>
-      <div class="export-pair">
-        <a href="{{ url_for('main.export_data', fmt='csv') }}" class="export-chip">CSV</a>
-        <a href="{{ url_for('main.export_data', fmt='json') }}" class="export-chip">JSON</a>
-      </div>
-    </div>
-
-    <div class="sidebar-sources">
-      <span class="sources-label">Live feeds</span>
-      <ul>
-        <li>SBIR.gov</li>
-        <li>Devpost</li>
-        <li>Opportunity Desk</li>
-      </ul>
-    </div>
-  </aside>
-
-  <div class="shell-main">
-    <header class="shell-topbar">
-      <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
-      <div class="topbar-slot">{% block topbar %}{% endblock %}</div>
-    </header>
-
-    <main class="shell-content">
-      {% block content %}{% endblock %}
-    </main>
-
-    <footer class="shell-footer">
-      <span>Assignment 3 · Web Scraping Pipeline</span>
-      <span>Auto-sync every 6h</span>
-    </footer>
-  </div>
-
-  <div id="scrape-modal" class="modal hidden" role="dialog">
+  <div id="scrape-modal" class="modal hidden" role="dialog" aria-labelledby="modal-title">
     <div class="modal-backdrop"></div>
-    <div class="modal-sheet">
-      <div class="modal-stripe"></div>
-      <h2>Sync all sources</h2>
-      <p class="modal-lead">Pull fresh grants, hackathons &amp; programs into the database.</p>
-      <label class="field">
-        <span>Keyword</span>
-        <input type="text" id="scrape-keyword" value="AI startup">
-      </label>
-      <label class="field">
-        <span>Region <em>(optional)</em></span>
-        <input type="text" id="scrape-region" placeholder="United States, Global…">
-      </label>
-      <div class="modal-foot">
-        <button type="button" class="btn-outline modal-cancel">Cancel</button>
-        <button type="button" id="scrape-confirm" class="btn-solid">Run pipeline</button>
+    <div class="modal-panel">
+      <h2 id="modal-title">Run Scraper</h2>
+      <label>Keyword <input type="text" id="scrape-keyword" class="input" value="AI startup"></label>
+      <label>Region <input type="text" id="scrape-region" class="input" placeholder="e.g. United States, Global"></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+        <button type="button" id="scrape-confirm" class="btn btn-primary">Start scraping</button>
       </div>
     </div>
   </div>
 
-  <div id="toast-root"></div>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
